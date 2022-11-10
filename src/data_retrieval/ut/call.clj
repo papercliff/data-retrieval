@@ -4,12 +4,16 @@
             [environ.core :as env]))
 
 (defn call [endpoint params]
+  (Thread/sleep 1000)
   (-> (env/env :papercliff-base-url)
       (str endpoint)
       (client/get
         {:content-type :json
-         :headers      {"x-rapidapi-proxy-secret"
-                        (env/env :x-rapidapi-proxy-secret)}
+         :headers      {"X-RapidAPI-Key"
+                        (env/env :x-rapidapi-key)
+
+                        "X-RapidAPI-Host"
+                        "papercliff.p.rapidapi.com"}
          :query-params params})
       :body
       (json/read-str :key-fn keyword)))
