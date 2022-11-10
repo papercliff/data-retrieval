@@ -41,15 +41,14 @@
     "resources/%s-actions.json"
     (dt/->start-of-week-str now)))
 
-(defn save-important-nodes [extra-threshold time]
+(defn save-important-nodes [time]
   (let [collected (-> time collect/keywords-path fs/load-content)
         infimum-agencies (->> collected
                               (map
                                 #(->> %
                                       (map :agencies)
                                       (apply min)))
-                              (apply max)
-                              (+ (* extra-threshold 2)))]
+                              (apply max))]
     (->> collected
          (map
            (fn [coll]

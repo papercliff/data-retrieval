@@ -8,7 +8,6 @@
 
 (defn- go-transform [extra-threshold time]
   (println "extra-threshold" extra-threshold)
-  (transform/save-important-nodes extra-threshold time)
   (transform/save-important-edges extra-threshold time)
   (transform/save-graph time)
   (transform/save-clusters time)
@@ -29,12 +28,14 @@
       (inc extra-threshold)
       time)))
 
-(defn- save-collections [time]
-    (collect/save-keywords time)
-    (collect/save-combinations time))
-
 (defn -main [time]
   (do
-    (save-collections time)
+    (collect/save-keywords time)
+    (collect/save-combinations time)
+    (transform/save-important-nodes time)
     (go-transform 0 time)
     (meta-transform/save-actions-with-days time)))
+
+(comment
+  (do (require '[data-retrieval.ut.date-time :as dt])
+      (-main (dt/now))))
