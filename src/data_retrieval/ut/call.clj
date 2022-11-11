@@ -5,7 +5,7 @@
 
 (defn call [endpoint params]
   (Thread/sleep 1000)
-  (-> (env/env :papercliff-base-url)
+  (-> "https://papercliff.p.rapidapi.com/"
       (str endpoint)
       (client/get
         {:content-type :json
