@@ -6,19 +6,19 @@
 (defn keywords-path [now]
   (format
     "../historical-data/collected/%s-keywords.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn combinations-path [now]
   (format
     "../historical-data/collected/%s-combinations.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn- save-results [endpoint path-fun time]
   (->> time
-       dt/running-week-pairs
+       dt/running-day-pairs
        (map
          (fn [[from to]]
-           (println from)
+           (println to)
            (call/call
              endpoint
              {:from from

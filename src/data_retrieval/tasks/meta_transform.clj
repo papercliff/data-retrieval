@@ -5,8 +5,8 @@
 
 (defn- actions-with-day-path [now]
   (format
-    "../historical-data/transformed/%s-actions-with-days.json"
-    (dt/->start-of-week-str now)))
+    "../historical-data/transformed/%s-actions-with-hours.json"
+    (dt/->start-of-prev-day-str now)))
 
 (defn save-actions-with-days [time]
   (->> time
@@ -15,11 +15,12 @@
        (mapcat
          (fn [[_ to] actions]
            (cons
-             {:action  "change-day"
-              :new_day (-> to
-                           dt/hour-str->
-                           dt/prev-hour-pretty-str)}
+             {:action   "change-hour"
+              :new_hour (-> to
+                            dt/date-hour-str->
+                            dt/->hour-minute-str
+                            (str "\nUTC"))}
              actions))
-         (dt/running-week-pairs time))
+         (dt/running-day-pairs time))
        (fs/save-content
          (actions-with-day-path time))))

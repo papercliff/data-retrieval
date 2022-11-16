@@ -2,55 +2,51 @@
   (:require [clj-time.core :as time]
             [clj-time.format :as time-f]))
 
-(defn at-start-of-week [dt]
+(defn- at-start-of-prev-day [dt]
   (->> 1
-       time/weeks
+       time/days
        (time/minus dt)
        time/with-time-at-start-of-day))
 
-(defn ->hour-str [dt]
+(defn ->hour-minute-str [dt]
+  (time-f/unparse
+    (time-f/formatter
+      :hour-minute)
+    dt))
+
+(defn ->date-hour-str [dt]
   (time-f/unparse
     (time-f/formatter
       :date-hour-minute)
     dt))
 
-(defn hour-str-> [v]
+(defn date-hour-str-> [v]
   (time-f/parse
     (time-f/formatter
       :date-hour-minute)
     v))
 
-(defn ->start-of-week-str [dt]
+(defn ->start-of-prev-day-str [dt]
   (time-f/unparse
     (time-f/formatter :date)
-    (at-start-of-week dt)))
-
-(defn prev-hour-pretty-str [dt]
-  (let [rfc822 (time-f/unparse
-                 (time-f/formatter :rfc822)
-                 (time/minus dt (time/hours 1)))]
-    (str (subs rfc822 0 3)
-         (subs rfc822 4 7)
-         "\n"
-         (subs rfc822 8 16))))
+    (at-start-of-prev-day dt)))
 
 (defn now []
   (time/now))
 
-(defn running-week-pairs [dt]
+(defn running-day-pairs [dt]
   (->> dt
-       at-start-of-week
+       at-start-of-prev-day
+       at-start-of-prev-day
        (iterate
          #(time/plus
             %
             (time/hours 1)))
-       (take
-         (inc
-           (* 6 24)))
+       (take 25)
        (map
          #(vector
-            (->hour-str %)
-            (->hour-str
+            (->date-hour-str %)
+            (->date-hour-str
               (time/plus
                 %
                 (time/days 1)))))))

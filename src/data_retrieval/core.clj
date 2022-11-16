@@ -4,7 +4,8 @@
             [data-retrieval.tasks.meta-transform :as meta-transform]
             [data-retrieval.tasks.transform :as transform]))
 
-(def in-between-millis 300)
+(def in-between-millis 450)
+(def change-hour-millis 100)
 
 (defn- go-transform [extra-threshold time]
   (println "extra-threshold" extra-threshold)
@@ -23,7 +24,8 @@
                  (= action "add-edge")))
              count
              (* in-between-millis)
-             (< 60000))
+             (+ (* 25 change-hour-millis))
+             (< 45000))
     (recur
       (inc extra-threshold)
       time)))

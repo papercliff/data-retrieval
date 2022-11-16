@@ -11,12 +11,12 @@ Then, they can be used to create
 ### Collect keywords
 
 Extracts the most popular keywords for a running window of 24 hours 
-that covers the last 7 days.
+that covers the previous day.
 
 ### Collect combinations
 
 Extracts the most popular combinations/triples of keywords for a
-running window of 24 hours that covers the last 7 days.
+running window of 24 hours that covers the previous day.
 
 ### Important nodes
 
@@ -24,8 +24,8 @@ Looks at the extracted keywords and finds the least popular keyword
 for every instance of the running window. Then, it finds the most
 popular of these (`infimum`), and with that, it filters out the
 keywords that have less popularity. This process ensures that the
-keywords are treated equally. The ones that were identified on a quiet
-day have no advantage over the others.
+keywords are treated equally. The ones that were identified on a bussy
+time have no disadvantage over the others.
 
 ### Important edges
 
@@ -69,9 +69,9 @@ _clustered graph_, _diffs_, _actions_) are executed again,
 until the resulted actions have fewer edges.
 So, the new actions will be easily visualized in a short video.
 
-### Actions with days
+### Actions with hours
 
-New actions (`"change-day"`) are inserted.
+New actions (`"change-hour"`) are inserted.
 
 ## Usage
 
@@ -82,6 +82,6 @@ and create the environment variable `X_RAPIDAPI_KEY`.
 ## Historical data
 
 You can find the extracted and end-results files for the previous
-weeks in the
+days in the
 [historical-data](https://github.com/papercliff/historical-data)
 repository.

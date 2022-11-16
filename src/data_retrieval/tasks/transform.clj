@@ -9,37 +9,37 @@
 (defn- important-nodes-path [now]
   (format
     "resources/%s-important-nodes.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn- important-edges-path [now]
   (format
     "resources/%s-important-edges.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn- graph-path [now]
   (format
     "resources/%s-graph.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn- clusters-path [now]
   (format
     "resources/%s-clusters.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn- clustered-graph-path [now]
   (format
     "resources/%s-clustered-graph.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn- diffs-path [now]
   (format
     "resources/%s-diffs.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn actions-path [now]
   (format
     "resources/%s-actions.json"
-    (dt/->start-of-week-str now)))
+    (dt/->start-of-prev-day-str now)))
 
 (defn save-important-nodes [time]
   (let [collected (-> time collect/keywords-path fs/load-content)
