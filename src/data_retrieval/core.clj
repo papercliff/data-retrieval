@@ -4,7 +4,7 @@
             [data-retrieval.tasks.meta-transform :as meta-transform]
             [data-retrieval.tasks.transform :as transform]))
 
-(def in-between-millis 450)
+(def in-between-millis 300)
 (def change-hour-millis 100)
 
 (defn- go-transform [extra-threshold time]
