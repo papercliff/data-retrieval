@@ -15,28 +15,30 @@
   (transform/save-clustered-graph time)
   (transform/save-diffs time)
   (transform/save-actions time)
-  (when (->> time
-             transform/actions-path
-             fs/load-content
-             (apply concat)
-             (filter
-               (fn [{:keys [action]}]
-                 (= action "add-edge")))
-             count
-             (* in-between-millis)
-             (+ (* 25 change-hour-millis))
-             (< 45000))
-    (recur
-      (inc extra-threshold)
-      time)))
+  (let [duration (->> time
+                      transform/actions-path
+                      fs/load-content
+                      (apply concat)
+                      (filter
+                        (fn [{:keys [action]}]
+                          (= action "add-edge")))
+                      count
+                      (* in-between-millis)
+                      (+ (* 25 change-hour-millis)))]
+    (if (< duration 40000)
+      duration
+      (recur
+        (inc extra-threshold)
+        time))))
 
 (defn -main [time]
   (do
     (collect/save-keywords time)
     (collect/save-combinations time)
     (transform/save-important-nodes time)
-    (go-transform 0 time)
-    (meta-transform/save-actions-with-days time)))
+    (let [final-duration (go-transform 0 time)]
+      (meta-transform/save-actions-with-days time)
+      final-duration)))
 
 (comment
   (do (require '[data-retrieval.ut.date-time :as dt])
