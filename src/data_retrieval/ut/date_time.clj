@@ -2,7 +2,7 @@
   (:require [clj-time.core :as time]
             [clj-time.format :as time-f]))
 
-(defn- at-start-of-prev-day [dt]
+(defn at-start-of-prev-day [dt]
   (->> 1
        time/days
        (time/minus dt)

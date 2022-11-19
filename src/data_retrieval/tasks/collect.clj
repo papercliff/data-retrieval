@@ -1,5 +1,6 @@
 (ns data-retrieval.tasks.collect
-  (:require [data-retrieval.ut.call :as call]
+  (:require [clojure.string :as s]
+            [data-retrieval.ut.call :as call]
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]))
 
@@ -11,6 +12,11 @@
 (defn combinations-path [now]
   (format
     "../historical-data/collected/%s-combinations.json"
+    (dt/->start-of-prev-day-str now)))
+
+(defn- daily-keywords-path [now]
+  (format
+    "../historical-data/collected/%s-daily-keywords.json"
     (dt/->start-of-prev-day-str now)))
 
 (defn- save-results [endpoint path-fun time]
@@ -31,3 +37,24 @@
 
 (defn save-combinations [time]
   (save-results "combinations" combinations-path time))
+
+(defn save-daily-keywords [time]
+  (fs/save-content
+    (daily-keywords-path time)
+    (call/call
+      "keywords"
+      {:from (-> time
+                 dt/at-start-of-prev-day
+                 dt/at-start-of-prev-day
+                 dt/->date-hour-str)
+       :to   (-> time
+                 dt/at-start-of-prev-day
+                 dt/->date-hour-str)})))
+
+(defn print-daily-keywords [time]
+  (->> time
+       daily-keywords-path
+       fs/load-content
+       (map :keyword)
+       (s/join " · ")
+       println))
