@@ -62,13 +62,6 @@ is attached to them:
 * `"add-node"`
 * `"add-edge"`
 
-### Loop
-
-The last six scripts (_important edges_, _graph_, _clusters_,
-_clustered graph_, _diffs_, _actions_) are executed again,
-until the resulted actions have fewer edges.
-So, the new actions will be easily visualized in a short video.
-
 ### Actions with hours
 
 New actions (`"change-hour"`) are inserted.

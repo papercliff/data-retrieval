@@ -18,9 +18,15 @@
              {:action   "change-hour"
               :new_hour (-> to
                             dt/date-hour-str->
+                            dt/prev-hour
                             dt/->hour-minute-str
                             (str "\nUTC"))}
              actions))
          (dt/running-day-pairs time))
+       reverse
+       (cons
+         {:action   "change-hour"
+          :new_hour "00:00\nUTC"})
+       reverse
        (fs/save-content
          (actions-with-day-path time))))

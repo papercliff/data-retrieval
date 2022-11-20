@@ -34,6 +34,11 @@
 (defn now []
   (time/now))
 
+(defn prev-hour [dt]
+  (time/minus
+    dt
+    (time/hours 1)))
+
 (defn running-day-pairs [dt]
   (->> dt
        at-start-of-prev-day
