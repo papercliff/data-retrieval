@@ -9,7 +9,7 @@
     (collect/save-combinations time)
     (collect/save-daily-keywords time)
     (transform/save-important-nodes time)
-    (transform/save-important-edges 0 time)
+    (transform/save-important-edges time)
     (transform/save-graph time)
     (transform/save-clusters time)
     (transform/save-clustered-graph time)

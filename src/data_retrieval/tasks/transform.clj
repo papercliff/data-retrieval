@@ -60,15 +60,14 @@
          (fs/save-content
            (important-nodes-path time)))))
 
-(defn save-important-edges [extra-threshold time]
+(defn save-important-edges [time]
   (let [collected (-> time collect/combinations-path fs/load-content)
         infimum-agencies (->> collected
                               (map
                                 #(->> %
                                       (map :agencies)
                                       (apply min)))
-                              (apply max)
-                              (+ extra-threshold))]
+                              (apply max))]
     (->> collected
          (map
            (fn [coll]
