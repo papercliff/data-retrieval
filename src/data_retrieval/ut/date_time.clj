@@ -47,7 +47,8 @@
          #(time/plus
             %
             (time/hours 1)))
-       (take 25)
+       rest
+       (take 24)
        (map
          #(vector
             (->date-hour-str %)
