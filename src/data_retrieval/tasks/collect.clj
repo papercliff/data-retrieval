@@ -56,5 +56,6 @@
        daily-keywords-path
        fs/load-content
        (map :keyword)
-       (s/join " · ")
+       (map #(str "#" %))
+       (s/join " ")
        println))

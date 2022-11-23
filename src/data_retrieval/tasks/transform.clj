@@ -140,9 +140,10 @@
          (map
            (fn [{:keys [nodes edges]}]
              {:nodes (map
-                       (fn [[w _]]
-                         {:id      w
-                          :cluster ((keyword w) clusters)})
+                       (fn [[id wgt]]
+                         {:id      id
+                          :weight  wgt
+                          :cluster ((keyword id) clusters)})
                        nodes)
               :edges (map
                        (fn [[s t]]
@@ -182,6 +183,9 @@
                 :removed-nodes (remove
                                  #(curr-node-set (:id %))
                                  (:nodes prev))
+                :updated-nodes (filter
+                                 #(curr-node-set (:id %))
+                                 (:nodes prev))
                 :added-edges   (remove
                                  #(prev-edge-set (set (vals %)))
                                  (:edges curr))
@@ -198,6 +202,7 @@
          (map
            (fn [{:keys [added-nodes
                         removed-nodes
+                        updated-nodes
                         added-edges
                         removed-edges]}]
              (concat
@@ -207,6 +212,7 @@
                (->> removed-nodes
                     reverse
                     (map #(assoc % :action "remove-node")))
+               (map #(assoc % :action "update-node") updated-nodes)
                (map #(assoc % :action "add-node") added-nodes)
                (map #(assoc % :action "add-edge") added-edges))))
          (fs/save-content
