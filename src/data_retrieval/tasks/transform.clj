@@ -118,24 +118,20 @@
            :edges dgs})
         final-nodes final-edges))))
 
+(defn- load-cluster-sets [time]
+  (->> time
+       graph-path
+       fs/load-content
+       (mapcat :edges)
+       (apply loom/graph)
+       loom-alg/connected-components
+       (map set)))
+
 (defn save-clusters [time]
-  (let [prev-str-sets (->> time
-                           dt/at-start-of-prev-day
-                           graph-path
-                           fs/load-content
-                           (mapcat :edges)
-                           (apply loom/graph)
-                           loom-alg/connected-components
-                           (map set))
-        curr-str-sets (->> time
-                           graph-path
-                           fs/load-content
-                           (mapcat :edges)
-                           (apply loom/graph)
-                           loom-alg/connected-components
-                           (map set))
+  (let [prev-str-sets (-> time dt/at-start-of-prev-day load-cluster-sets)
+        curr-str-sets (load-cluster-sets time)
         new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
-    (doseq [cluster (filter #(<= 3 (count %) 5) new-str-sets)]
+    (doseq [cluster (filter #(= (count %) 3) new-str-sets)]
       (->> cluster
            sort
            (s/join " · ")
