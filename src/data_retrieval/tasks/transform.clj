@@ -3,6 +3,7 @@
             [data-retrieval.tasks.collect :as collect]
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]
+            [data-retrieval.ut.re-cluster :as re-cluster]
             [loom.graph :as loom]
             [loom.alg :as loom-alg]))
 
@@ -118,19 +119,30 @@
         final-nodes final-edges))))
 
 (defn save-clusters [time]
-  (->> time
-       graph-path
-       fs/load-content
-       (mapcat :edges)
-       (apply loom/graph)
-       loom-alg/connected-components
-       (mapcat
-         (fn [i nds]
-           (map #(vector % i) nds))
-         (range))
-       (into {})
-       (fs/save-content
-         (clusters-path time))))
+  (let [prev-str-sets (->> time
+                           dt/at-start-of-prev-day
+                           graph-path
+                           fs/load-content
+                           (mapcat :edges)
+                           (apply loom/graph)
+                           loom-alg/connected-components
+                           (map set))
+        curr-str-sets (->> time
+                           graph-path
+                           fs/load-content
+                           (mapcat :edges)
+                           (apply loom/graph)
+                           loom-alg/connected-components
+                           (map set))
+        new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
+    (doseq [cluster (filter #(<= 3 (count %) 5) new-str-sets)]
+      (->> cluster
+           sort
+           (s/join " · ")
+           println))
+    (fs/save-content
+      (clusters-path time)
+      (re-cluster/str-sets->key-dict new-str-sets))))
 
 (defn save-clustered-graph [time]
   (let [clusters (-> time clusters-path fs/load-content)]
