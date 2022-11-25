@@ -1,11 +1,36 @@
 (ns data-retrieval.ut.re-cluster
   (:require [clojure.set :as st]))
 
+(defn- empty-vec-of-sets [len]
+  (mapv
+    (constantly #{})
+    (range len)))
+
+(defn str-sets->key-dict [sets]
+  (->> sets
+       (mapcat
+         (fn [i nds]
+           (map
+             #(vector % i)
+             (map keyword nds)))
+         (range))
+       (into {})))
+
+(defn key-dict->str-sets [dict]
+  (let [init-vec (->> dict
+                      (map second)
+                      (apply max)
+                      inc
+                      empty-vec-of-sets)]
+    (reduce
+      (fn [acc [x i]]
+        (update acc i #(st/union % #{(name x)})))
+      init-vec
+      dict)))
+
 (defn- similarity [xs ys]
-  (let [set-xs (set xs)
-        set-ys (set ys)]
-    (/ (count (st/intersection set-xs set-ys))
-       (count (st/union set-xs set-ys)))))
+  (/ (count (st/intersection xs ys))
+     (count (st/union xs ys))))
 
 (defn- go [prev-unpicked-pairs curr-unpicked curr-picked-pairs]
   (if (seq curr-unpicked)
@@ -21,7 +46,7 @@
                               (->> (range)
                                    (remove
                                      (->> curr-picked-pairs (map first) set))
-                                   second))]
+                                   first))]
       (go
         (remove
           (fn [[i _]]
@@ -44,8 +69,7 @@
         init-vec (->> [prev-groups curr-groups]
                       (map count)
                       (apply max)
-                      range
-                      (mapv (constantly [])))]
+                      empty-vec-of-sets)]
     (reduce
       (fn [acc [i x]] (assoc acc i x))
       init-vec
