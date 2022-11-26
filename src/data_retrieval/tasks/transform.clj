@@ -131,7 +131,7 @@
   (let [prev-str-sets (-> time dt/at-start-of-prev-day load-cluster-sets)
         curr-str-sets (load-cluster-sets time)
         new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
-    (doseq [cluster (filter #(= (count %) 3) new-str-sets)]
+    (doseq [cluster (sort-by count new-str-sets)]
       (->> cluster
            sort
            (s/join " · ")
