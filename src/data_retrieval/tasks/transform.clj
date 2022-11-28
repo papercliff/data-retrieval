@@ -24,7 +24,7 @@
 
 (defn- clusters-path [now]
   (format
-    "resources/%s-clusters.json"
+    "../historical-data/transformed/%s-clusters.json"
     (dt/->start-of-prev-day-str now)))
 
 (defn- clustered-graph-path [now]
@@ -130,11 +130,17 @@
 (defn save-clusters [time]
   (let [prev-str-sets (-> time dt/at-start-of-prev-day load-cluster-sets)
         curr-str-sets (load-cluster-sets time)
-        new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
-    (doseq [cluster (sort-by count new-str-sets)]
+        new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)
+        sorted-new-clusters (->> new-str-sets
+                                 (sort-by count)
+                                 (map sort))]
+    (doseq [cluster sorted-new-clusters]
+      (println
+        (s/join " · " cluster)))
+    (doseq [cluster sorted-new-clusters]
       (->> cluster
-           sort
-           (s/join " · ")
+           (map #(str "#" %))
+           (s/join " ")
            println))
     (fs/save-content
       (clusters-path time)
