@@ -118,30 +118,29 @@
            :edges dgs})
         final-nodes final-edges))))
 
-(defn- load-cluster-sets [time]
-  (->> time
-       graph-path
-       fs/load-content
-       (mapcat :edges)
-       (apply loom/graph)
-       loom-alg/connected-components
-       (map set)))
-
 (defn save-clusters [time]
-  (let [prev-str-sets (-> time dt/at-start-of-prev-day load-cluster-sets)
-        curr-str-sets (load-cluster-sets time)
-        new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)
-        sorted-new-clusters (->> new-str-sets
-                                 (sort-by count)
-                                 (map sort))]
-    (doseq [cluster sorted-new-clusters]
-      (println
-        (s/join " · " cluster)))
-    (doseq [cluster sorted-new-clusters]
-      (->> cluster
-           (map #(str "#" %))
-           (s/join " ")
-           println))
+  (let [prev-str-sets (-> time
+                          dt/at-start-of-prev-day
+                          clusters-path
+                          fs/load-content
+                          re-cluster/key-dict->str-sets)
+        curr-graph (->> time
+                        graph-path
+                        fs/load-content
+                        (mapcat :edges)
+                        (apply loom/graph))
+        curr-str-sets (map
+                        set
+                        (loom-alg/connected-components curr-graph))
+        new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
+    (->> curr-graph
+         loom-alg/maximal-cliques
+         (sort-by count)
+         reverse
+         (map sort)
+         (map (partial s/join " · " ))
+         (s/join "\n\n")
+         println)
     (fs/save-content
       (clusters-path time)
       (re-cluster/str-sets->key-dict new-str-sets))))
