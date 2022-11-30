@@ -139,7 +139,7 @@
          reverse
          (map sort)
          (map (partial s/join " · " ))
-         (s/join "\n\n")
+         (s/join "\n")
          println)
     (fs/save-content
       (clusters-path time)
