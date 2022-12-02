@@ -42,25 +42,6 @@
     "resources/%s-actions.json"
     (dt/->start-of-prev-day-str now)))
 
-(defn save-important-nodes [time]
-  (let [collected (-> time collect/keywords-path fs/load-content)
-        infimum-agencies (->> collected
-                              (map
-                                #(->> %
-                                      (map :agencies)
-                                      (apply min)))
-                              (apply max))]
-    (->> collected
-         (map
-           (fn [coll]
-             (->> coll
-                  (filter
-                    (fn [{:keys [agencies]}]
-                      (> agencies infimum-agencies)))
-                  (map #(vector (:keyword %) (:agencies %))))))
-         (fs/save-content
-           (important-nodes-path time)))))
-
 (defn save-important-edges [time]
   (let [collected (-> time collect/combinations-path fs/load-content)
         infimum-agencies (->> collected
@@ -86,6 +67,36 @@
                   distinct)))
          (fs/save-content
            (important-edges-path time)))))
+
+(defn save-important-nodes [time]
+  (let [parts-of-large-clusters (->> time
+                                     important-edges-path
+                                     fs/load-content
+                                     (apply concat)
+                                     distinct
+                                     (apply loom/graph)
+                                     loom-alg/connected-components
+                                     (filter #(> (count %) 3))
+                                     (apply concat)
+                                     set)
+        collected (-> time collect/keywords-path fs/load-content)
+        infimum-agencies (->> collected
+                              (map
+                                #(->> %
+                                      (map :agencies)
+                                      (apply min)))
+                              (apply max))]
+    (->> collected
+         (map
+           (fn [coll]
+             (->> coll
+                  (filter
+                    #(and
+                       (parts-of-large-clusters (:keyword %))
+                       (> (:agencies %) infimum-agencies)))
+                  (map #(vector (:keyword %) (:agencies %))))))
+         (fs/save-content
+           (important-nodes-path time)))))
 
 (defn save-graph [time]
   (let [nodes (-> time important-nodes-path fs/load-content)
@@ -138,8 +149,9 @@
          (sort-by count)
          reverse
          (map sort)
-         (map (partial s/join " · " ))
+         (map (partial s/join " · "))
          (s/join "\n")
+         (format "%s\n#daily #news #keywords")
          println)
     (fs/save-content
       (clusters-path time)
