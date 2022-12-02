@@ -29,12 +29,24 @@
       dict)))
 
 (defn- similarity [xs ys]
-  (/ (count (st/intersection xs ys))
-     (count (st/union xs ys))))
+  (if (and (seq xs) (seq ys))
+    (/ (count (st/intersection xs ys))
+       (count (st/union xs ys)))
+    0))
 
 (defn- go [prev-unpicked-pairs curr-unpicked curr-picked-pairs]
   (if (seq curr-unpicked)
-    (let [just-picked-cluster (second (apply max-key (comp count second) curr-unpicked))
+    (let [prev-unpicked-keyword-set (->> prev-unpicked-pairs
+                                         (mapcat second)
+                                         set)
+          just-picked-cluster (second
+                                (apply
+                                  max-key
+                                  #(->> %
+                                        second
+                                        (filter prev-unpicked-keyword-set)
+                                        count)
+                                  curr-unpicked))
           just-picked-index (if (seq prev-unpicked-pairs)
                               (->> prev-unpicked-pairs
                                    (apply
