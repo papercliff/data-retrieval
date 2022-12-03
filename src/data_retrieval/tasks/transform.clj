@@ -42,6 +42,25 @@
     "resources/%s-actions.json"
     (dt/->start-of-prev-day-str now)))
 
+(defn save-important-nodes [time]
+  (let [collected (-> time collect/keywords-path fs/load-content)
+        infimum-agencies (->> collected
+                              (map
+                                #(->> %
+                                      (map :agencies)
+                                      (apply min)))
+                              (apply max))]
+    (->> collected
+         (map
+           (fn [coll]
+             (->> coll
+                  (filter
+                    (fn [{:keys [agencies]}]
+                      (> agencies infimum-agencies)))
+                  (map #(vector (:keyword %) (:agencies %))))))
+         (fs/save-content
+           (important-nodes-path time)))))
+
 (defn save-important-edges [time]
   (let [collected (-> time collect/combinations-path fs/load-content)
         infimum-agencies (->> collected
@@ -68,10 +87,26 @@
          (fs/save-content
            (important-edges-path time)))))
 
-(defn save-important-nodes [time]
-  (let [parts-of-large-clusters (->> time
-                                     important-edges-path
-                                     fs/load-content
+(defn- filtered-edges [nodes edges]
+  (map
+    (fn [nds dgs]
+      (let [node-words (map first nds)]
+        (->> dgs
+             (map
+               (fn [[a b]]
+                 (filter
+                   #(or (= % a)
+                        (= % b))
+                   node-words)))
+             (filter
+               #(= (count %) 2)))))
+    nodes edges))
+
+(defn save-graph [time]
+  (let [nodes (-> time important-nodes-path fs/load-content)
+        edges (-> time important-edges-path fs/load-content)
+        semi-final-edges (filtered-edges nodes edges)
+        nodes-of-large-clusters (->> semi-final-edges
                                      (apply concat)
                                      distinct
                                      (apply loom/graph)
@@ -79,48 +114,17 @@
                                      (filter #(> (count %) 3))
                                      (apply concat)
                                      set)
-        collected (-> time collect/keywords-path fs/load-content)
-        infimum-agencies (->> collected
-                              (map
-                                #(->> %
-                                      (map :agencies)
-                                      (apply min)))
-                              (apply max))]
-    (->> collected
-         (map
-           (fn [coll]
-             (->> coll
-                  (filter
-                    #(and
-                       (parts-of-large-clusters (:keyword %))
-                       (> (:agencies %) infimum-agencies)))
-                  (map #(vector (:keyword %) (:agencies %))))))
-         (fs/save-content
-           (important-nodes-path time)))))
-
-(defn save-graph [time]
-  (let [nodes (-> time important-nodes-path fs/load-content)
-        edges (-> time important-edges-path fs/load-content)
-        final-edges (map
-                      (fn [nds dgs]
-                        (let [node-words (map first nds)]
-                          (->> dgs
-                               (map
-                                 (fn [[a b]]
-                                   (filter
-                                     #(or (= % a)
-                                          (= % b))
-                                     node-words)))
-                               (filter
-                                 #(= (count %) 2)))))
-                      nodes edges)
         final-nodes (map
                       (fn [nds dgs]
                         (let [edge-words (set (apply concat dgs))]
                           (filter
-                            #(edge-words (first %))
+                            (fn [[nd _]]
+                              (and
+                                (edge-words nd)
+                                (nodes-of-large-clusters nd)))
                             nds)))
-                      nodes final-edges)]
+                      nodes semi-final-edges)
+        final-edges (filtered-edges final-nodes edges)]
     (fs/save-content
       (graph-path time)
       (map

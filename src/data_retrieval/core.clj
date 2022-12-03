@@ -7,8 +7,8 @@
   (do
     (collect/save-keywords time)
     (collect/save-combinations time)
-    (transform/save-important-edges time)
     (transform/save-important-nodes time)
+    (transform/save-important-edges time)
     (transform/save-graph time)
     (transform/save-clusters time)
     (transform/save-clustered-graph time)
@@ -21,8 +21,8 @@
       (-main (dt/now)))
   (do (require '[data-retrieval.ut.date-time :as dt])
     (let [time (dt/now)]
-      (transform/save-important-edges time)
       (transform/save-important-nodes time)
+      (transform/save-important-edges time)
       (transform/save-graph time)
       (transform/save-clusters time)
       (transform/save-clustered-graph time)
