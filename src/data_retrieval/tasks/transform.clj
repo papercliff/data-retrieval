@@ -144,15 +144,13 @@
                         fs/load-content
                         (mapcat :edges)
                         (apply loom/graph))
-        curr-str-sets (map
-                        set
-                        (loom-alg/connected-components curr-graph))
+        connected-components (loom-alg/connected-components
+                               curr-graph)
+        curr-str-sets (map set connected-components)
         new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
-    (->> curr-graph
-         loom-alg/maximal-cliques
-         (sort-by count)
-         reverse
+    (->> connected-components
          (map sort)
+         (sort-by #(vector (/ 1 (count %)) (s/join " " %)))
          (map (partial s/join " · "))
          (s/join "\n")
          (format "%s\n#daily #news #keywords")
