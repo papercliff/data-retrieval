@@ -144,14 +144,14 @@
                         fs/load-content
                         (mapcat :edges)
                         (apply loom/graph))
-        connected-components (loom-alg/connected-components
-                               curr-graph)
-        curr-str-sets (map set connected-components)
+        curr-str-sets (map
+                        set
+                        (loom-alg/connected-components curr-graph))
         new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
-    (->> connected-components
+    (->> curr-graph
+         loom-alg/maximal-cliques
          (map sort)
          (sort-by #(vector (/ 1 (count %)) (s/join " " %)))
-         (map (partial s/join " · "))
          (s/join "\n")
          (format "%s\n#daily #news #keywords")
          println)
@@ -168,8 +168,8 @@
            (fn [{:keys [nodes edges]}]
              {:nodes (map
                        (fn [[id wgt]]
-                         {:id      id
-                          :weight  wgt
+                         {:id id
+                          :weight wgt
                           :cluster ((keyword id) clusters)})
                        nodes)
               :edges (map
@@ -204,18 +204,18 @@
                                       :edges
                                       (map #(set (vals %)))
                                       set)]
-               {:added-nodes   (remove
-                                 #(prev-node-set (:id %))
-                                 (:nodes curr))
+               {:added-nodes (remove
+                               #(prev-node-set (:id %))
+                               (:nodes curr))
                 :removed-nodes (remove
                                  #(curr-node-set (:id %))
                                  (:nodes prev))
                 :updated-nodes (filter
                                  #(curr-node-set (:id %))
                                  (:nodes prev))
-                :added-edges   (remove
-                                 #(prev-edge-set (set (vals %)))
-                                 (:edges curr))
+                :added-edges (remove
+                               #(prev-edge-set (set (vals %)))
+                               (:edges curr))
                 :removed-edges (remove
                                  #(curr-edge-set (set (vals %)))
                                  (:edges prev))}))
