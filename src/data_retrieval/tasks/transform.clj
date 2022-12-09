@@ -151,7 +151,7 @@
     (->> curr-graph
          loom-alg/maximal-cliques
          (map sort)
-         (sort-by #(vector (count %) (s/join " " %)))
+         (sort-by #(vector (/ 1 (count %)) (s/join " " %)))
          (map (partial s/join " · "))
          (s/join "\n")
          (format "%s\n#daily #news #keywords")
