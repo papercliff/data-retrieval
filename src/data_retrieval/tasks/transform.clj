@@ -48,7 +48,10 @@
                               (map
                                 #(->> %
                                       (map :agencies)
-                                      (apply min)))
+                                      sort
+                                      reverse
+                                      (take 50)
+                                      last))
                               (apply max))]
     (->> collected
          (map
