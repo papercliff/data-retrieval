@@ -1,7 +1,7 @@
-(ns data-retrieval.core
-  (:require [data-retrieval.tasks.collect :as collect]
-            [data-retrieval.tasks.meta-transform :as meta-transform]
-            [data-retrieval.tasks.transform :as transform]))
+(ns data-retrieval.tasks.video-main
+  (:require [data-retrieval.tasks.video.collect :as collect]
+            [data-retrieval.tasks.video.meta-transform :as meta-transform]
+            [data-retrieval.tasks.video.transform :as transform]))
 
 (defn -main [time]
   (do

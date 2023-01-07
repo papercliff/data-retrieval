@@ -1,5 +1,5 @@
-(ns data-retrieval.tasks.collect
-  (:require [data-retrieval.ut.call :as call]
+(ns data-retrieval.tasks.video.collect
+  (:require [data-retrieval.apis.papercliff :as papercliff-api]
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]))
 
@@ -18,8 +18,7 @@
        dt/running-day-pairs
        (map
          (fn [[from to]]
-           (println to)
-           (call/call
+           (papercliff-api/call
              endpoint
              {:from from
               :to   to})))

@@ -1,5 +1,5 @@
-(ns data-retrieval.tasks.meta-transform
-  (:require [data-retrieval.tasks.transform :as transform]
+(ns data-retrieval.tasks.video.meta-transform
+  (:require [data-retrieval.tasks.video.transform :as transform]
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]))
 

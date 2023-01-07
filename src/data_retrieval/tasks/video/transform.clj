@@ -1,6 +1,6 @@
-(ns data-retrieval.tasks.transform
+(ns data-retrieval.tasks.video.transform
   (:require [clojure.string :as s]
-            [data-retrieval.tasks.collect :as collect]
+            [data-retrieval.tasks.video.collect :as collect]
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]
             [data-retrieval.ut.re-cluster :as re-cluster]
@@ -50,7 +50,7 @@
                                       (map :agencies)
                                       sort
                                       reverse
-                                      (take 50)
+                                      (take 75)
                                       last))
                               (apply max))]
     (->> collected
