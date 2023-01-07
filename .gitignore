@@ -13,4 +13,3 @@ pom.xml.asc
 /.idea/
 /data-retrieval.iml
 .env
-/resources/
