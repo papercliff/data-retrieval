@@ -45,4 +45,4 @@
         (github-change/commit!
           (str "Auto file addition " path))
         (github-change/update-branch!)))
-  (Thread/sleep 30000))
+  (Thread/sleep 60000))
