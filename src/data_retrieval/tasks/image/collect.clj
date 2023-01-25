@@ -6,12 +6,12 @@
 (defn keywords-path [now]
   (format
     "collected/%s-single-day-keywords.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn combinations-path [now]
   (format
     "collected/%s-single-day-combinations.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn- query-params [now offset]
   (merge

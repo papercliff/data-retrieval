@@ -12,32 +12,32 @@
 (defn- important-nodes-path [now]
   (format
     "resources/%s-single-day-important-nodes.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn- important-edges-path [now]
   (format
     "resources/%s-single-day-important-edges.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn- graph-path [now]
   (format
     "resources/%s-single-day-graph.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn- clusters-path [now]
   (format
     "transformed/%s-single-day-clusters.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn- clustered-graph-path [now]
   (format
     "resources/%s-single-day-clustered-graph.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn actions-path [now]
   (format
     "transformed/%s-single-day-actions.json"
-    (dt/->start-of-prev-day-str now)))
+    (dt/->prev-day-str now)))
 
 (defn save-important-nodes [now]
   (let [collected (-> now collect/keywords-path github-api/load-content)
