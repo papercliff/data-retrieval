@@ -3,30 +3,17 @@
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]))
 
-(defn- actions-with-day-path [now]
-  (format
-    "../historical-data/transformed/%s-actions-with-hours.json"
-    (dt/->start-of-prev-day-str now)))
+(def actions-with-days-path
+  "resources/actions-with-days.json")
 
-(defn save-actions-with-days [time]
-  (->> time
-       transform/actions-path
+(defn save-actions-with-days []
+  (->> transform/actions-path
        fs/load-content
        (mapcat
-         (fn [[_ to] actions]
+         (fn [time actions]
            (cons
-             {:action   "change-hour"
-              :new_hour (-> to
-                            dt/date-hour-str->
-                            dt/prev-hour
-                            dt/->hour-minute-str
-                            (str "\nUTC"))}
+             {:action "change-day"
+              :new_day (dt/->eee-d-str time)}
              actions))
-         (dt/running-day-pairs time))
-       reverse
-       (cons
-         {:action   "change-hour"
-          :new_hour "00:00\nUTC"})
-       reverse
-       (fs/save-content
-         (actions-with-day-path time))))
+         (dt/prev-month-days (dt/now)))
+       (fs/save-content actions-with-days-path)))

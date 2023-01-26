@@ -1,56 +1,47 @@
 (ns data-retrieval.tasks.video.transform
   (:require [clojure.string :as s]
-            [data-retrieval.tasks.video.collect :as collect]
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]
             [data-retrieval.ut.re-cluster :as re-cluster]
             [loom.graph :as loom]
             [loom.alg :as loom-alg]))
 
-(defn- important-nodes-path [now]
-  (format
-    "resources/%s-important-nodes.json"
-    (dt/->start-of-prev-day-str now)))
+(def important-nodes-path
+  "resources/important-nodes.json")
 
-(defn- important-edges-path [now]
-  (format
-    "resources/%s-important-edges.json"
-    (dt/->start-of-prev-day-str now)))
+(def important-edges-path
+  "resources/important-edges.json")
 
-(defn- graph-path [now]
-  (format
-    "resources/%s-graph.json"
-    (dt/->start-of-prev-day-str now)))
+(def graph-path
+  "resources/graph.json")
 
-(defn- clusters-path [now]
-  (format
-    "../historical-data/transformed/%s-clusters.json"
-    (dt/->start-of-prev-day-str now)))
+(def clusters-path
+  "resources/clusters.json")
 
-(defn- clustered-graph-path [now]
-  (format
-    "resources/%s-clustered-graph.json"
-    (dt/->start-of-prev-day-str now)))
+(def clustered-graph-path
+  "resources/clustered-graph.json")
 
-(defn- diffs-path [now]
-  (format
-    "resources/%s-diffs.json"
-    (dt/->start-of-prev-day-str now)))
+(def diffs-path
+  "resources/diffs.json")
 
-(defn actions-path [now]
-  (format
-    "resources/%s-actions.json"
-    (dt/->start-of-prev-day-str now)))
+(def actions-path
+  "resources/actions.json")
 
-(defn save-important-nodes [time]
-  (let [collected (-> time collect/keywords-path fs/load-content)
+(defn- prev-month-contents [fmt]
+  (->> (dt/now)
+       dt/prev-month-days
+       (map dt/->day-str)
+       (map (partial format fmt))
+       (map fs/load-content)))
+
+(defn save-important-nodes []
+  (let [collected (prev-month-contents
+                    "../historical-data/collected/%s-single-day-keywords.json")
         infimum-agencies (->> collected
                               (map
                                 #(->> %
                                       (map :agencies)
-                                      sort
-                                      reverse
-                                      (take 75)
+                                      (take 100)
                                       last))
                               (apply max))]
     (->> collected
@@ -61,16 +52,17 @@
                     (fn [{:keys [agencies]}]
                       (> agencies infimum-agencies)))
                   (map #(vector (:keyword %) (:agencies %))))))
-         (fs/save-content
-           (important-nodes-path time)))))
+         (fs/save-content important-nodes-path))))
 
-(defn save-important-edges [time]
-  (let [collected (-> time collect/combinations-path fs/load-content)
+(defn save-important-edges []
+  (let [collected (prev-month-contents
+                    "../historical-data/collected/%s-single-day-combinations.json")
         infimum-agencies (->> collected
                               (map
                                 #(->> %
                                       (map :agencies)
-                                      (apply min)))
+                                      (take 33)
+                                      last))
                               (apply max))]
     (->> collected
          (map
@@ -87,8 +79,7 @@
                        [a c]
                        [b c]]))
                   distinct)))
-         (fs/save-content
-           (important-edges-path time)))))
+         (fs/save-content important-edges-path))))
 
 (defn- filtered-edges [nodes edges]
   (map
@@ -105,9 +96,9 @@
                #(= (count %) 2)))))
     nodes edges))
 
-(defn save-graph [time]
-  (let [nodes (-> time important-nodes-path fs/load-content)
-        edges (-> time important-edges-path fs/load-content)
+(defn save-graph []
+  (let [nodes (fs/load-content important-nodes-path)
+        edges (fs/load-content important-edges-path)
         semi-final-edges (filtered-edges nodes edges)
         nodes-of-large-clusters (->> semi-final-edges
                                      (apply concat)
@@ -129,44 +120,26 @@
                       nodes semi-final-edges)
         final-edges (filtered-edges final-nodes edges)]
     (fs/save-content
-      (graph-path time)
+      graph-path
       (map
         (fn [nds dgs]
           {:nodes nds
            :edges dgs})
         final-nodes final-edges))))
 
-(defn save-clusters [time]
-  (let [prev-str-sets (-> time
-                          dt/at-start-of-prev-day
-                          clusters-path
-                          fs/load-content
-                          re-cluster/key-dict->str-sets)
-        curr-graph (->> time
-                        graph-path
-                        fs/load-content
-                        (mapcat :edges)
-                        (apply loom/graph))
-        curr-str-sets (map
-                        set
-                        (loom-alg/connected-components curr-graph))
-        new-str-sets (re-cluster/new-groups prev-str-sets curr-str-sets)]
-    (->> curr-graph
-         loom-alg/maximal-cliques
-         (map sort)
-         (sort-by #(vector (/ 1 (count %)) (s/join " " %)))
-         (map (partial s/join " · "))
-         (s/join "\n")
-         (format "%s\n#daily #news #keywords")
-         println)
-    (fs/save-content
-      (clusters-path time)
-      (re-cluster/str-sets->key-dict new-str-sets))))
+(defn save-clusters []
+  (->> graph-path
+       fs/load-content
+       (mapcat :edges)
+       (apply loom/graph)
+       loom-alg/connected-components
+       (map set)
+       re-cluster/str-sets->key-dict
+       (fs/save-content clusters-path)))
 
-(defn save-clustered-graph [time]
-  (let [clusters (-> time clusters-path fs/load-content)]
-    (->> time
-         graph-path
+(defn save-clustered-graph []
+  (let [clusters (fs/load-content clusters-path)]
+    (->> graph-path
          fs/load-content
          (map
            (fn [{:keys [nodes edges]}]
@@ -181,11 +154,10 @@
                          {:source s
                           :target t})
                        edges)}))
-         (fs/save-content
-           (clustered-graph-path time)))))
+         (fs/save-content clustered-graph-path))))
 
-(defn save-diffs [time]
-  (let [clustered-graph (-> time clustered-graph-path fs/load-content)]
+(defn save-diffs []
+  (let [clustered-graph (fs/load-content clustered-graph-path)]
     (->> clustered-graph
          (cons
            {:nodes []
@@ -224,27 +196,25 @@
                                  #(curr-edge-set (set (vals %)))
                                  (:edges prev))}))
            clustered-graph)
-         (fs/save-content
-           (diffs-path time)))))
+         (fs/save-content diffs-path))))
 
-(defn save-actions [time]
-  (let [diffs (-> time diffs-path fs/load-content)]
-    (->> diffs
-         (map
-           (fn [{:keys [added-nodes
-                        removed-nodes
-                        updated-nodes
-                        added-edges
-                        removed-edges]}]
-             (concat
-               (->> removed-edges
-                    reverse
-                    (map #(assoc % :action "remove-edge")))
-               (->> removed-nodes
-                    reverse
-                    (map #(assoc % :action "remove-node")))
-               (map #(assoc % :action "update-node") updated-nodes)
-               (map #(assoc % :action "add-node") added-nodes)
-               (map #(assoc % :action "add-edge") added-edges))))
-         (fs/save-content
-           (actions-path time)))))
+(defn save-actions []
+  (->> diffs-path
+       fs/load-content
+       (map
+         (fn [{:keys [added-nodes
+                      removed-nodes
+                      updated-nodes
+                      added-edges
+                      removed-edges]}]
+           (concat
+             (->> removed-edges
+                  reverse
+                  (map #(assoc % :action "remove-edge")))
+             (->> removed-nodes
+                  reverse
+                  (map #(assoc % :action "remove-node")))
+             (map #(assoc % :action "update-node") updated-nodes)
+             (map #(assoc % :action "add-node") added-nodes)
+             (map #(assoc % :action "add-edge") added-edges))))
+       (fs/save-content actions-path)))

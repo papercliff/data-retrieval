@@ -27,6 +27,12 @@
       at-start-of-prev-day
       ->day-str))
 
+(defn ->eee-d-str [dt]
+  (time-f/unparse
+    (time-f/formatter
+      "EEE\nd")
+    dt))
+
 (defn now []
   (time/now))
 
