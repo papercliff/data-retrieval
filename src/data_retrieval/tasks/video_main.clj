@@ -11,4 +11,5 @@
     (transform/save-clustered-graph)
     (transform/save-diffs)
     (transform/save-actions)
-    (meta-transform/save-actions-with-days)))
+    (meta-transform/save-actions-with-days))
+  (System/exit 0))

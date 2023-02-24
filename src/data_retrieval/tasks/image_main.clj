@@ -21,7 +21,8 @@
           (transform/save-clusters now)
           (transform/save-clustered-graph now)
           (transform/save-actions now)
-          (timbre/info "image task completed")))))
+          (timbre/info "image task completed"))))
+  (System/exit 0))
 
 (comment
   (do (require '[data-retrieval.ut.fs :as fs])
