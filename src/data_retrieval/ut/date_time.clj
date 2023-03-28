@@ -1,6 +1,7 @@
 (ns data-retrieval.ut.date-time
   (:require [clj-time.core :as time]
-            [clj-time.format :as time-f]))
+            [clj-time.format :as time-f]
+            [clojure.string :as s]))
 
 (def at-start-of-curr-day
   time/with-time-at-start-of-day)
@@ -27,26 +28,28 @@
       at-start-of-prev-day
       ->day-str))
 
-(defn ->eee-d-str [dt]
-  (time-f/unparse
-    (time-f/formatter
-      "EEE\nd")
-    dt))
+(defn ->eee-mmm-dd-yyyy-str [dt]
+  (-> "EEE MMM dd YYYY"
+      time-f/formatter
+      (time-f/unparse dt)
+      s/upper-case))
 
 (defn now []
   (time/now))
 
-(defn prev-month-days [now]
-  (let [one-month-ago (time/minus
-                        now
-                        (time/months 1))
-        first-day (time/first-day-of-the-month- one-month-ago)
-        last-day (time/last-day-of-the-month- one-month-ago)]
-    (->> first-day
-         (iterate
-           #(time/plus
-              %
-              (time/days 1)))
-         (map at-start-of-curr-day)
-         (take-while
-           #(time/before? % last-day)))))
+(defn prev-week-days [now]
+  (let [prev-day (at-start-of-prev-day now)
+
+        end-of-prev-week
+        (if (= (time/day-of-week prev-day) 7)
+          prev-day
+          (->> prev-day
+               (iterate at-start-of-prev-day)
+               (take-while
+                 #(not= (time/day-of-week %) 7))
+               last
+               at-start-of-prev-day))]
+    (->> end-of-prev-week
+         (iterate at-start-of-prev-day)
+         (take 7)
+         reverse)))

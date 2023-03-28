@@ -13,7 +13,7 @@
          (fn [time actions]
            (cons
              {:action "change-day"
-              :new_day (dt/->eee-d-str time)}
+              :new_day (dt/->eee-mmm-dd-yyyy-str time)}
              actions))
-         (dt/prev-month-days (dt/now)))
+         (dt/prev-week-days (dt/now)))
        (fs/save-content actions-with-days-path)))

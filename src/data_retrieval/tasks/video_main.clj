@@ -3,13 +3,7 @@
             [data-retrieval.tasks.video.transform :as transform]))
 
 (defn -main []
-  (do
-    (transform/save-important-nodes)
-    (transform/save-important-edges)
-    (transform/save-graph)
-    (transform/save-clusters)
-    (transform/save-clustered-graph)
-    (transform/save-diffs)
-    (transform/save-actions)
-    (meta-transform/save-actions-with-days))
+  (transform/save-diffs)
+  (transform/save-actions)
+  (meta-transform/save-actions-with-days)
   (System/exit 0))

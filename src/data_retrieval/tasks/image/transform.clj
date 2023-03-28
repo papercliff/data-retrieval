@@ -34,9 +34,12 @@
     "resources/%s-single-day-clustered-graph.json"
     (dt/->prev-day-str now)))
 
+(def actions-path-fmt
+  "transformed/%s-single-day-actions.json")
+
 (defn actions-path [now]
   (format
-    "transformed/%s-single-day-actions.json"
+    actions-path-fmt
     (dt/->prev-day-str now)))
 
 (defn save-important-nodes [now]
