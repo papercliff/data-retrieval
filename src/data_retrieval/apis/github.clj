@@ -3,8 +3,8 @@
             [clj-github.changeset :as github-change]
             [clj-http.client :as client]
             [clojure.data.json :as json]
-            [environ.core :as env]
-            [taoensso.timbre :as timbre]))
+            [clojure.tools.logging :as log]
+            [environ.core :as env]))
 
 (def raw-github-prefix
   "https://raw.githubusercontent.com/papercliff/historical-data/master/")
@@ -21,7 +21,7 @@
       (= 200)))
 
 (defn load-content [path]
-  (timbre/info "loading github contents from" path)
+  (log/info "loading github contents from" path)
   (-> path
       github-response
       :body
@@ -29,7 +29,7 @@
 
 (defn save-content
   [path content]
-  (timbre/infof "saving github contents to %s and wait" path)
+  (log/infof "saving github contents to %s and wait" path)
   (let [client (github-client/new-client
                  {:token (env/env :github-token)})]
     (-> (github-change/from-branch!

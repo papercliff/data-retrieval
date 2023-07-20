@@ -1,13 +1,13 @@
-(ns data-retrieval.tasks.image.transform
+(ns data-retrieval.tasks.transform
   (:require [clojure.string :as s]
+            [clojure.tools.logging :as log]
             [data-retrieval.apis.github :as github-api]
-            [data-retrieval.tasks.image.collect :as collect]
+            [data-retrieval.tasks.collect :as collect]
             [data-retrieval.ut.date-time :as dt]
             [data-retrieval.ut.fs :as fs]
             [data-retrieval.ut.re-cluster :as re-cluster]
             [loom.graph :as loom]
-            [loom.alg :as loom-alg]
-            [taoensso.timbre :as timbre]))
+            [loom.alg :as loom-alg]))
 
 (defn- important-nodes-path [now]
   (format
@@ -114,7 +114,7 @@
                                 (map clusters-path)
                                 (filter github-api/file-exists?)
                                 first)
-        _ (timbre/infof
+        _ (log/infof
             "using %s as previous clusters path"
             prev-clusters-path)
         prev-str-sets (-> prev-clusters-path

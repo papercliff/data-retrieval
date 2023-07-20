@@ -1,20 +1,16 @@
 (ns data-retrieval.ut.fs
   (:require [clojure.data.json :as json]
-            [clojure.java.io :as io]
-            [taoensso.timbre :as timbre]))
-
-(defn file-exists? [path]
-  (.exists (io/as-file path)))
+            [clojure.tools.logging :as log]))
 
 (defn load-content [path]
-  (timbre/info "loading contents from" path)
+  (log/info "loading contents from" path)
   (json/read-str
     (slurp path)
     :key-fn keyword))
 
 (defn save-content
   [path content]
-  (timbre/info "saving contents to" path)
+  (log/info "saving contents to" path)
   (spit
     path
     (json/write-str

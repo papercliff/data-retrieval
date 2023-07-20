@@ -1,80 +1,38 @@
-# data-retrieval
+# Data Retrieval
 
-This repository contains the scripts that extract data from the
-[papercliff api](https://github.com/papercliff/api-documentation),
-and apply transformations until they reach their final form.
-Then, they can be used to create
-[animated graphs](https://github.com/orgs/papercliff/repositories).
+This project contains scripts to automate the daily retrieval and transformation of papercliff data.
 
-## Scripts
+## Functionality
 
-### Collect keywords
+The script at `src/data_retrieval/core.clj` is the entry point to the application and is responsible for executing the
+daily tasks. It includes saving keywords, combinations, important nodes and edges, clusters, clustered graphs, and
+actions.
 
-Extracts the most popular keywords for a running window of 24 hours 
-that covers the previous day.
+## Important namespaces
 
-### Collect combinations
+1. `data_retrieval.tasks.collect`: This script is responsible for data collection. It calls the papercliff API to
+retrieve data and save it in the form of keywords and combinations. The function `papercliff-data` uses the papercliff
+and Github APIs to collect and save the data.
 
-Extracts the most popular combinations/triples of keywords for a
-running window of 24 hours that covers the previous day.
+2. `data-retrieval.tasks.transform`: This script is responsible for transforming the collected data. It filters
+important nodes and edges and saves the data accordingly. It also generates and saves graph data, clusters, clustered
+graphs, and actions.
 
-### Important nodes
+3. `data-retrieval.core`: This is the entry point to the application and is responsible for running the daily
+tasks. It first checks if the actions file already exists. If not, it triggers the process to save keywords,
+combinations, important nodes and edges, clusters, clustered graphs, and actions.
 
-Looks at the extracted keywords and finds the least popular keyword
-for every instance of the running window. Then, it finds the most
-popular of these (`infimum`), and with that, it filters out the
-keywords that have less popularity. This process ensures that the
-keywords are treated equally. The ones that were identified on a bussy
-time have no disadvantage over the others.
+4. `data-retrieval.ut.re-cluster`: This script contains utility functions for re-clustering the collected data.
+It provides methods for converting between string sets and key dictionaries, calculating the similarity between sets,
+and generating new groups based on current and previous groupings.
 
-### Important edges
+## How to Run
 
-The triples are turned into edges. Then the `infimum` of the edges is
-calculated and used for filtering.
+To run the script, you will need a Clojure environment. Once that is set up, you can execute the script
+`src/data_retrieval/core.clj`. This will start the daily tasks.
 
-### Graph
+**Note:** Make sure to set the appropriate environment variables needed for your API calls.
 
-The nodes and edges are combined to form the graph. The script makes
-sure that:
-* there is no isolated node
-* the source and the target of every edge are important nodes
-* the source of every edge is more important than the target
+## Dependencies
 
-### Clusters
-
-The nodes are divided into clusters (connected components).
-
-### Clustered graph
-
-A `cluster` is assigned to every node of the graph.
-
-### Diffs
-
-By looking at the successive instances of the running window, the script
-highlights what nodes/edges are added/removed at each time.
-
-### Actions
-
-The results of the previous script (_diff_) become flat and an `action`
-is attached to them:
-* `"remove-edge"`
-* `"remove-node"`
-* `"add-node"`
-* `"add-edge"`
-
-### Actions with hours
-
-New actions (`"change-hour"`) are inserted.
-
-## Usage
-
-If you want to run the scripts, you will need to obtain an API key
-from [rapidapi](https://rapidapi.com/mrdimosthenis/api/papercliff/)
-and create the environment variable `X_RAPIDAPI_KEY`.
-
-## Historical data
-
-You can find the extracted and end-results files for the previous
-days in the
-[historical-data](https://github.com/papercliff/historical-data)
-repository.
+The project relies heavily on the [Loom](https://github.com/aysylu/loom) library for working with graph data structures.

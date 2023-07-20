@@ -1,4 +1,4 @@
-(ns data-retrieval.tasks.image.collect
+(ns data-retrieval.tasks.collect
   (:require [data-retrieval.apis.papercliff :as papercliff-api]
             [data-retrieval.apis.github :as github-api]
             [data-retrieval.ut.date-time :as dt]))

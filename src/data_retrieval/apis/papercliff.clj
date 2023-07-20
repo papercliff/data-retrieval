@@ -1,21 +1,19 @@
 (ns data-retrieval.apis.papercliff
   (:require [clj-http.client :as client]
             [clojure.data.json :as json]
-            [environ.core :as env]
-            [taoensso.timbre :as timbre]))
+            [clojure.tools.logging :as log]
+            [environ.core :as env]))
 
 (defn call [endpoint params]
-  (timbre/info "getting" endpoint params)
+  (log/info "getting" endpoint params)
   (Thread/sleep 5000)
-  (-> "https://papercliff.p.rapidapi.com/"
-      (str endpoint)
+  (-> :papercliff-core-url
+      env/env
+      (str "/api/v1/" endpoint)
       (client/get
         {:content-type :json
-         :headers {"X-RapidAPI-Key"
-                   (env/env :x-rapidapi-key)
-
-                   "X-RapidAPI-Host"
-                   "papercliff.p.rapidapi.com"}
+         :headers      {(env/env :papercliff-core-header-name)
+                        (env/env :papercliff-core-header-value)}
          :query-params params})
       :body
       (json/read-str :key-fn keyword)))
