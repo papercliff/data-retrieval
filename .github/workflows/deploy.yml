@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Tests
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
           PAPERCLIFF_CORE_URL: ${{ secrets.PAPERCLIFF_CORE_URL }}
           PAPERCLIFF_CORE_HEADER_NAME: ${{ secrets.PAPERCLIFF_CORE_HEADER_NAME }}
           PAPERCLIFF_CORE_HEADER_VALUE: ${{ secrets.PAPERCLIFF_CORE_HEADER_VALUE }}
